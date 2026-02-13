@@ -170,7 +170,7 @@ class Calculator {
             result = left * right
         case .divide:
             if right == 0 {
-                displayedString = "Error"
+                displayedString = "NOPE"
                 stored = nil
                 pending = nil
                 typing = false
