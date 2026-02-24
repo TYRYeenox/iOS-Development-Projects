@@ -47,6 +47,7 @@ class Calculator {
         }
     }
     
+    //Number
     func number(_ digit: Int) {
         guard (0...9).contains(digit)
         else {
@@ -73,6 +74,7 @@ class Calculator {
         displayedString += "\(digit)"
     }
     
+    // Backspace
     func backspace() {
         var back = displayedString
         if back == "0" {
@@ -85,6 +87,7 @@ class Calculator {
         displayedString = back
     }
     
+    //Clear
     func clear() {
         displayedString = "0"
         stored = nil
@@ -92,6 +95,7 @@ class Calculator {
         typing = false
     }
     
+    //Percent
     func percent() {
         if let value = Double(displayedString) {
             let result = value / 100
@@ -100,6 +104,7 @@ class Calculator {
         }
     }
     
+    //Divide
     func divide() {
         if let value = Double(displayedString) {
             stored = value
@@ -108,6 +113,7 @@ class Calculator {
         }
     }
     
+    //Multiply
     func multiply() {
         if let value = Double(displayedString) {
             stored = value
@@ -116,6 +122,7 @@ class Calculator {
         }
     }
     
+    //Subtract
     func subtract() {
         if let value = Double(displayedString) {
             stored = value
@@ -124,6 +131,7 @@ class Calculator {
         }
     }
     
+    //Add
     func add() {
         if let value = Double(displayedString) {
             stored = value
@@ -131,6 +139,8 @@ class Calculator {
             typing = false
         }
     }
+    
+    //InvertSign
     func invertSign() {
         if let value = Double(displayedString) {
             let inverted = -value
@@ -138,6 +148,7 @@ class Calculator {
         }
     }
     
+    //Decimal
     func decimal() {
         if !typing {
             displayedString = "0."
@@ -150,6 +161,7 @@ class Calculator {
         displayedString.append(".")
     }
     
+    //Equal
     func equal() {
         guard let right = Double(displayedString)
             else {
