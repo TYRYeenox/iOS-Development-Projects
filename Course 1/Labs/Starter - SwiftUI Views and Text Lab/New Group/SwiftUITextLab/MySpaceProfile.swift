@@ -93,7 +93,7 @@ struct TopFiveFriendsView: View {
             
             Text("🧌 Duag")
                 .font(.custom("MarkerFelt-Wide", size: 25))
-                .foregroundStyle(.green)
+                .foregroundStyle(.pink)
         }
         .padding()
     }
