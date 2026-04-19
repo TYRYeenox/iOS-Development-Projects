@@ -6,9 +6,11 @@
 //
 
 import SwiftUI
+import Foundation
 
 struct MyRecipesScreen: View {
-    @State private var recipes = Recipe.savedList
+    private let storageKey = "saved.recipes"
+    @State private var recipes: [Recipe] = []
     @State private var showingAddRecipe = false
     
     var body: some View {
@@ -18,14 +20,34 @@ struct MyRecipesScreen: View {
                     Text(recipe.title)
                 }
             }
+            .onAppear(perform: loadRecipes)
             .toolbar {
-                Button(action: { showingAddRecipe = true}) {
+                Button(action: {
+                    showingAddRecipe = true
+                }) {
                     Image(systemName: "plus")
                 }
             }
         }
         .sheet(isPresented: $showingAddRecipe) {
-            AddRecipeSheet(recipes: $recipes)
+            AddRecipeSheet(recipes: $recipes, onSave: {
+                saveRecipes()
+            })
+        }
+    }
+    
+    private func saveRecipes() {
+        guard let data = try? JSONEncoder().encode(recipes) else { return }
+        UserDefaults.standard.set(data, forKey: storageKey)
+    }
+
+    private func loadRecipes() {
+        if let data = UserDefaults.standard.data(forKey: storageKey),
+           let decoded = try? JSONDecoder().decode([Recipe].self, from: data) {
+            recipes = decoded
+        } else {
+            // Fallback to any bundled defaults if nothing saved yet
+            recipes = Recipe.savedList
         }
     }
 }
@@ -33,34 +55,40 @@ struct MyRecipesScreen: View {
 struct AddRecipeSheet: View {
     @Environment(\.dismiss) var dismiss
     @Binding var recipes: [Recipe]
+    var onSave: () -> Void
 
     @State private var title = ""
     @State private var ingredients = ""
     @State private var instructions = ""
     
     var body: some View {
-        Form {
-            Section("Recipe Info") {
-                TextField("Title", text: $title)
-                TextField("Ingredients", text: $ingredients, axis: .vertical)
-                TextField("Instructions", text: $instructions, axis: .vertical)
-            }
-        }
-        .navigationTitle("New Recipe")
-        .toolbar {
-            ToolbarItem(placement: .confirmationAction) {
-                Button("Save") {
-                    let newRecipe = Recipe(
-                        title: title,
-                        ingredients: ingredients,
-                        instructions: instructions
-                    )
-                    recipes.append(newRecipe)
-                    dismiss()
+        NavigationStack {
+            Form {
+                Section("Recipe Info") {
+                    TextField("Title", text: $title)
+                    TextField("Ingredients", text: $ingredients, axis: .vertical)
+                    TextField("Instructions", text: $instructions, axis: .vertical)
                 }
             }
-            ToolbarItem(placement: .cancellationAction) {
-                Button("Cancel", action: dismiss.callAsFunction)
+            .navigationTitle("New Recipe")
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Save") {
+                        let trimmedTitle = title.trimmingCharacters(in: .whitespacesAndNewlines)
+                        guard !trimmedTitle.isEmpty else { return }
+                        let newRecipe = Recipe(
+                            title: trimmedTitle,
+                            ingredients: ingredients.trimmingCharacters(in: .whitespacesAndNewlines),
+                            instructions: instructions.trimmingCharacters(in: .whitespacesAndNewlines)
+                        )
+                        recipes.append(newRecipe)
+                        onSave()
+                        dismiss()
+                    }
+                }
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel", action: dismiss.callAsFunction)
+                }
             }
         }
     }
